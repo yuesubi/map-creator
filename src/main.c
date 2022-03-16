@@ -31,6 +31,9 @@ int main()
 	SetTargetFPS(60);
 	
 	while (!WindowShouldClose()) {
+
+		TilePicker_update(tilePicker, 1.f / 60.f);
+
 		BeginDrawing();
 			ClearBackground(BLACK);
 
