@@ -62,13 +62,35 @@ char ButtonColision(struct TilePicker *p_TilePicker)
 	return 0;
 }
 
+void ScrollDetect(struct TilePicker *p_TilePicker)
+{
+	const float posX = TILEPICKER_MARGIN_X;
+	const float posY = TILEPICKER_MARGIN_Y;
+
+	const float sizeX = (TILEPICKER_WIDTH > 0)? TILEPICKER_WIDTH :
+		GetScreenWidth() - TILEPICKER_MARGIN_X - TILEPICKER_WIDTH;
+	const float sizeY = (TILEPICKER_HEIGHT > 0)? TILEPICKER_HEIGHT :
+		GetScreenHeight() - TILEPICKER_MARGIN_Y - TILEPICKER_HEIGHT;
+
+	if (posX < GetMouseX() && GetMouseX() < posX + sizeX) {
+		if (posY < GetMouseY() && GetMouseY() < posY + sizeY) {
+			p_TilePicker->animTargetScrollY -= GetMouseWheelMove() *
+				TILEPICKER_SCROLL_VEL;
+		}
+	}
+}
+
 void TilePicker_update(struct TilePicker *p_TilePicker, float p_Dt)
 {
+	// Click detection
 	if (IsMouseButtonPressed(0)) {
 		if (ButtonColision(p_TilePicker))
 			goto done_left_click;
 	}
 done_left_click:
+
+	// Scroll detection
+	ScrollDetect(p_TilePicker);
 
 	// Scroll animation
 	float diff = p_TilePicker->animTargetScrollY - p_TilePicker->scrollY;
@@ -136,6 +158,13 @@ void TilePicker_render(struct TilePicker *p_TilePicker)
 
 		Tilemap_renderTileScreen(p_TilePicker->tilemap, tile, tilePos,
 			(float) TILEPICKER_TILE_SIZE);
+
+		if (p_TilePicker->picked == tile) {
+			DrawRectangleLines(tilePos.x - TILEPICKER_TILE_SIZE /
+					2.f,
+				tilePos.y - TILEPICKER_TILE_SIZE / 2.f,
+				TILEPICKER_TILE_SIZE, TILEPICKER_TILE_SIZE, RED);
+		}
 	}
 
 	// Draw Buttons
